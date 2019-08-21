@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { json } from 'express';
 import routes from './routes';
 
 class App {
