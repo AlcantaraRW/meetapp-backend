@@ -89,3 +89,6 @@ typings/
 
 # VS Code
 .vscode/
+
+# Temp files
+tmp/
