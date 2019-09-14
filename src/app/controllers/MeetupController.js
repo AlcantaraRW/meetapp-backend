@@ -22,7 +22,7 @@ class MeetupController {
       },
       limit: PAGE_SIZE,
       offset: (page - 1) * PAGE_SIZE,
-      attributes: ['id', 'title', 'description', 'location', 'date'],
+      attributes: ['id', 'title', 'description', 'location', 'date', 'past'],
       include: [
         {
           model: User,

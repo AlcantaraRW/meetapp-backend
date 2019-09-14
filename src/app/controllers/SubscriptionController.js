@@ -5,6 +5,7 @@ import Meetup from '../models/Meetup';
 import User from '../models/User';
 import Queue from '../../lib/Queue';
 import SubscriptionMail from '../jobs/SubscriptionMail';
+import File from '../models/File';
 
 class SubscriptionController {
   async index(req, res) {
@@ -17,19 +18,24 @@ class SubscriptionController {
         {
           model: Meetup,
           as: 'meetup',
-          attributes: [
-            'id',
-            'title',
-            'description',
-            'location',
-            'date',
-            'user_id',
-          ],
+          attributes: ['id', 'title', 'description', 'location', 'date'],
           where: {
             date: {
               [Op.gte]: new Date(),
             },
           },
+          include: [
+            {
+              model: User,
+              as: 'organizer',
+              attributes: ['id', 'name', 'email'],
+            },
+            {
+              model: File,
+              as: 'image',
+              attributes: ['id', 'path', 'url'],
+            },
+          ],
         },
       ],
       order: [['meetup', 'date']],
@@ -104,6 +110,26 @@ class SubscriptionController {
     Queue.add(SubscriptionMail.key, { meetup, user });
 
     return res.json(subscription);
+  }
+
+  async delete(req, res) {
+    const subscription = await Subscription.findByPk(req.params.id);
+
+    if (!subscription) {
+      return res.status(401).json({
+        error: 'Subscription not found',
+      });
+    }
+
+    if (subscription.user_id !== req.userId) {
+      return res.status(401).json({
+        error: 'You are not subscribed to this Meetup',
+      });
+    }
+
+    subscription.destroy();
+
+    return res.json();
   }
 }
 
